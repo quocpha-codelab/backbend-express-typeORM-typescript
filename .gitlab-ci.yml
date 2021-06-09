@@ -1,0 +1,43 @@
+stages:
+  - ESLint
+  - DeployTest
+  - DeployProd
+
+ESLint:
+  stage: ESLint
+  image: node:12.18.2-alpine
+  script:
+    - npm install
+    - npm run eslint
+
+DeployTest:
+  stage: DeployTest
+  image: node:14.15-alpine
+  only:
+    - develop@ams/backend
+  script:
+    - apk add rsync && apk add openssh
+    - echo "$TEST_ENV" > .env
+    - mkdir -p ~/.ssh
+    - ssh-keyscan -H '18.136.102.55'  >> ~/.ssh/known_hosts
+    - echo "$TEST_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - npm install
+    - rsync -azP --exclude='.git*' . ubuntu@18.136.102.55:/var/www/amsBackend
+    - ssh ubuntu@18.136.102.55 "cd /var/www/amsBackend && pm2 restart ams"
+
+DeployProd:
+  stage: DeployProd
+  image: node:14.15-alpine
+  only:
+    - master@ams/backend
+  script:
+    - apk add rsync && apk add openssh
+    - echo "$PROD_ENV" > .env
+    - mkdir -p ~/.ssh
+    - ssh-keyscan -H '18.140.90.78'  >> ~/.ssh/known_hosts
+    - echo "$PROD_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - npm install
+    - rsync -azP --exclude='.git*' . ubuntu@18.140.90.78:/var/www/amsBackend
+    - ssh ubuntu@18.140.90.78 "cd /var/www/amsBackend && pm2 restart ams"
