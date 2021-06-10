@@ -1,6 +1,6 @@
 import * as jwt from 'jsonwebtoken';
 
-export const generate = (payload: string): string => {
+export const generate = (payload: object): string => {
 	const token = jwt.sign(payload, process.env.JWT_KEY, {
 		algorithm: 'HS256',
 		notBefore: 0,

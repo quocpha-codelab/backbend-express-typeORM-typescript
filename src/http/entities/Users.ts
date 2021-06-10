@@ -7,13 +7,13 @@ export default class Users {
   id: number;
 
   @Column()
-  firstName: string;
+  username: string;
 
   @Column()
-  lastName: string;
+  password: string;
 
   @Column()
-  age: number;
+  fullName: string;
 
   @Column()
   status: number;
