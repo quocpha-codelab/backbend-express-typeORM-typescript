@@ -8,24 +8,21 @@ interface AddTaskParams {
   content: string;
   userId: number;
 }
-
-interface GetTaskListParams {
-  skip: number;
-  take: number;
-  userId: number;
-}
-
 export async function addTask({ title, content, userId }: AddTaskParams): Promise<void> {
   const taskRepository = getRepository(Tasks);
 
   try {
     await taskRepository.save({ title, content, userId });
   } catch (error) {
-    console.log(error);
-    return abort(500, 'Can not add new task');
+    abort(500, 'Can not add new task');
   }
 }
 
+interface GetTaskListParams {
+  skip: number;
+  take: number;
+  userId: number;
+}
 export async function getTaskList({ skip, take, userId }: GetTaskListParams): Promise<Record<string, unknown>> {
   const queryBuilder = getRepository(Tasks)
     .createQueryBuilder('task')
@@ -44,4 +41,22 @@ export async function getTaskList({ skip, take, userId }: GetTaskListParams): Pr
     skip,
     take,
   };
+}
+
+interface UpdateTaskParams {
+  title: string;
+  content: string;
+  userId: number;
+  taskId: number;
+  status: number;
+}
+export async function updateTask({ title, content, userId, taskId, status }: UpdateTaskParams): Promise<any> {
+  // const taskRepository = getRepository(Tasks);
+  // const taskInfo = taskRepository.findOne(taskId);
+  // return taskInfo;
+  // try {
+  //   await taskRepository.update(taskId, { status });
+  // } catch (error) {
+  //   abort(500, 'Can not update task');
+  // }
 }

@@ -29,16 +29,16 @@ interface MiddlewareInterface {
 /* -------------------------------------------------------------------------- */
 /*                               Class decorator                              */
 /* -------------------------------------------------------------------------- */
-export const APP = (routePrefix: string): ClassDecorator => {
+export const APP = (routePrefix: string, middlewares: RequestHandler[] | [] = []): ClassDecorator => {
   return (targetClass: any) => {
-    defineRoute(targetClass, routePrefix);
+    defineRoute(targetClass, routePrefix, middlewares);
   };
 };
 
 /* -------------------------------------------------------------------------- */
 /*                               Handle metadata                              */
 /* -------------------------------------------------------------------------- */
-function defineRoute(targetClass: any, routePrefix: string): void {
+function defineRoute(targetClass: any, routePrefix: string, defaultMiddlewares: RequestHandler[] | []): void {
   if (!Reflect.hasOwnMetadata('routes', targetClass)) {
     Reflect.defineMetadata('routes', [], targetClass);
   }
@@ -54,7 +54,7 @@ function defineRoute(targetClass: any, routePrefix: string): void {
   const middlewares = Reflect.getMetadata('middlewares', targetClass) as MiddlewareInterface[];
 
   routes.forEach((route: RouteInterface) => {
-    route.middlewares = route.middlewares ? route.middlewares : [];
+    route.middlewares = route.middlewares ? [...defaultMiddlewares, ...route.middlewares] : defaultMiddlewares;
 
     const methodMiddleware = middlewares.find((item) => item.propertyKey === route.propertyKey);
 
