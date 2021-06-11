@@ -1,5 +1,5 @@
 {
-   "name": "backendTsExpress",
+   "name": "backendtsexpress",
    "version": "0.0.1",
    "description": "Backend base using TypeORM + Express + Typescript",
    "devDependencies": {
@@ -11,8 +11,11 @@
    "dependencies": {
       "@types/express": "^4.17.12",
       "@types/jsonwebtoken": "^8.5.1",
+      "bcryptjs": "^2.4.3",
       "body-parser": "^1.18.1",
+      "cors": "^2.8.5",
       "express": "^4.15.4",
+      "helmet": "^4.6.0",
       "jsonwebtoken": "^8.5.1",
       "mysql": "^2.14.1",
       "nodemon": "^2.0.7",

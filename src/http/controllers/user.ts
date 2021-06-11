@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 
 import auth from '../middlewares/auth';
-import { getAllUser } from "../services/user";
+import { getAllUser, getUserProfile } from "../services/user";
 import { APP, Get } from '../../helper/decorator';
 
 @APP('/users')
@@ -11,5 +11,12 @@ export default class UserController {
 		const res = await getAllUser();
 
 		response.status(200).send(res);
+	}
+
+	@Get('/profile', [auth])
+	async getUserProfile(req: Request, res: Response): Promise<object> {
+		const responseData = await getUserProfile(req["user"].id);
+
+		return res.status(200).send(responseData);
 	}
 }

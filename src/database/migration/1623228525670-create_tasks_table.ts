@@ -1,5 +1,7 @@
 import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
 
+import { TaskStatus } from "../../enums/TaskStatus";
+
 export class createTasksTable1623228525670 implements MigrationInterface {
 
 	public async up(queryRunner: QueryRunner): Promise<void> {
@@ -24,10 +26,7 @@ export class createTasksTable1623228525670 implements MigrationInterface {
 				{
 					name: "status",
 					type: "tinyint",
-				},
-				{
-					name: "age",
-					type: "int",
+					default: TaskStatus.OPEN,
 				},
 				{
 					name: "userId",
