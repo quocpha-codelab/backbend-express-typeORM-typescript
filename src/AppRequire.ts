@@ -1,1 +1,1 @@
-import './http/controllers/index'
+import './http/controllers/index';

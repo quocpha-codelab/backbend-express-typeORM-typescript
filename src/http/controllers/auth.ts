@@ -1,21 +1,29 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 
-import { signIn, signUp } from "../services/auth";
+import * as authService from '../services/auth';
 import { APP, Post } from '../../helper/decorator';
+import { validate } from './../../helper/validate';
+import { signUpSchema } from './../../validators/auth';
 
 @APP('/auth')
 export default class UserController {
   @Post('/sign-in')
-	async signIn(req: Request, res: Response): Promise<void> {
-		const responseData = await signIn(req.body);
+  async signIn(req: Request, res: Response): Promise<void> {
+    const responseData = await authService.signIn(req.body);
 
-		res.status(200).send(responseData);
-	}
+    res.status(200).send(responseData);
+  }
 
   @Post('/sign-up')
   async signUp(req: Request, res: Response): Promise<void> {
-  	const responseData = await signUp(req.body);
+    const params = {
+      username: req.body.username,
+      fullName: req.body.fullName,
+      password: req.body.password,
+    };
 
-  	res.status(200).send(responseData);
+    await validate(signUpSchema, params);
+    const responseData = await authService.signUp(params);
+    res.status(200).send(responseData);
   }
 }
