@@ -14,9 +14,9 @@ export default class UserController {
 	}
 
 	@Get('/profile', [auth])
-	async getUserProfile(req: Request, res: Response): Promise<object> {
-		const responseData = await getUserProfile(req["user"].id);
+  async getUserProfile(req: Request, res: Response): Promise<object> {
+  	const responseData = await getUserProfile(req["user"].id);
 
-		return res.status(200).send(responseData);
-	}
+  	return res.status(200).send(responseData);
+  }
 }

@@ -1,7 +1,22 @@
 # Steps to run this project:
-1. npm run i
+1. npm i
 2. npm run docker
-3. npm run start
+3. npm run migrate:run
+4. npm run start
 
-# Create migrate
-npm run migrate:create
+# Migrate
+
+  ## Run
+  npm run migrate:run
+
+  ## Create
+  npm run migrate:create
+
+  ## Rollback
+  npm run migrate:rollback
+
+# Run eslint
+npm run eslint
+
+# Fix possible eslint
+npm run fix

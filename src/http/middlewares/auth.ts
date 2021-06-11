@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 
-import { UserStatus } from '../../enums/UserStatus';
+import { UserStatus } from '../../enums/User';
 import * as jwt from '../../helper/jwt';
 import Users from '../entities/Users';
 

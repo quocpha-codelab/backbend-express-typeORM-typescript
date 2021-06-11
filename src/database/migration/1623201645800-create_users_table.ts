@@ -1,5 +1,5 @@
-import { UserStatus } from "../../enums/UserStatus";
-import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey } from "typeorm";
+import { UserStatus } from "../../enums/User";
+import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
 export class createUsersTable1623201645800 implements MigrationInterface {
 
@@ -11,6 +11,8 @@ export class createUsersTable1623201645800 implements MigrationInterface {
 					name: "id",
 					type: "int",
 					isPrimary: true,
+					isGenerated: true,
+					generationStrategy: 'increment',
 				},
 				{
 					name: "username",

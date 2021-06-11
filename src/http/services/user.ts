@@ -11,13 +11,13 @@ export async function getAllUser() : Promise<object> {
 
 export async function getUserProfile(userId: number) : Promise<object> {
 	const profile = await getRepository(Users)
-    .createQueryBuilder('user')
-    .where('user.id = :id', { id: userId })
+		.createQueryBuilder('user')
+		.where('user.id = :id', { id: userId })
 		.select([
-      'user.id id',
-      'user.username username',
-      'user.fullName fullName',
-    ])
+			'user.id id',
+			'user.username username',
+			'user.fullName fullName',
+		])
 		.getRawOne();
 
 	return profile;

@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
 
-import { TaskStatus } from "../../enums/TaskStatus";
+import { TaskStatus } from "../../enums/Task";
 
 export class createTasksTable1623228525670 implements MigrationInterface {
 
@@ -13,7 +13,9 @@ export class createTasksTable1623228525670 implements MigrationInterface {
 				{
 					name: "id",
 					type: "int",
-					isPrimary: true
+					isPrimary: true,
+					isGenerated: true,
+					generationStrategy: 'increment',
 				},
 				{
 					name: "title",

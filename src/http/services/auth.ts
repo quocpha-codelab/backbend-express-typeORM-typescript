@@ -3,7 +3,7 @@ import { compareSync, hashSync } from 'bcryptjs';
 
 import { abort } from '../../helper/error';
 import { generate } from '../../helper/jwt';
-import { UserStatus } from '../../enums/UserStatus';
+import { UserStatus } from '../../enums/User';
 import Users from "../entities/Users";
 
 interface SignInParams {
@@ -34,7 +34,7 @@ export async function signIn({ username, password }: SignInParams) : Promise<any
 	};
 }
 
-export async function signUp({ username, fullName, password }: SignUpParams) :  Promise<any> {
+export async function signUp({ username, fullName, password }: SignUpParams) : Promise<any> {
 	const userRepository = getRepository(Users);
 
 	const isAccountExist = await userRepository.count({ username });
@@ -44,7 +44,7 @@ export async function signUp({ username, fullName, password }: SignUpParams) :  
 	const user = await userRepository.save({ username, fullName, password: hashPassword });
 	const accessToken = await generate({ userId: user.id });
 
-  return {
+	return {
 		userId: user.id,
 		accessToken,
 	};
