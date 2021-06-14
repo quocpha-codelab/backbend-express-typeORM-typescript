@@ -12,9 +12,10 @@ export default class UserController {
   async addTask(req: Request, res: Response): Promise<void> {
     const params = {
       userId: req['user'].id,
-      title: String(req.query.title),
-      content: String(req.query.content),
+      title: req.body.title,
+      content: req.body.content,
     };
+
     await taskService.addTask(params);
 
     res.status(201).send();
@@ -24,13 +25,19 @@ export default class UserController {
   async getTasks(req: Request, res: Response): Promise<void> {
     const params = {
       userId: req['user'].id,
-      skip: +req.query.skip,
-      take: +req.query.take,
+      skip: req.query.skip,
+      take: req.query.take,
     };
 
     validate(getTasksSchema, params);
 
-    const responseData = await taskService.getTaskList(params);
+    const formatParams = {
+      userId: req['user'].id,
+      skip: +req.query.skip,
+      take: +req.query.take,
+    };
+
+    const responseData = await taskService.getTaskList(formatParams);
 
     res.status(200).send(responseData);
   }
@@ -39,14 +46,23 @@ export default class UserController {
   async updateTask(req: Request, res: Response): Promise<void> {
     const params = {
       userId: req['user'].id,
+      taskId: req.params.taskId,
+      status: req.query.status,
+      title: req.query.title,
+      content: req.query.content,
+    };
+
+    validate(updateTaskSchema, params);
+
+    const formatParams = {
+      userId: req['user'].id,
       taskId: +req.params.taskId,
       status: +req.query.status,
       title: String(req.query.title),
       content: String(req.query.content),
     };
 
-    validate(updateTaskSchema, params);
-    await taskService.updateTask(params);
+    await taskService.updateTask(formatParams);
 
     res.sendStatus(204);
   }

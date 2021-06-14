@@ -12,7 +12,8 @@ export async function addTask({ title, content, userId }: AddTaskParams): Promis
   const taskRepository = getRepository(Tasks);
 
   try {
-    await taskRepository.save({ title, content, userId });
+    const newTask = taskRepository.create({ title, content, user: { id: userId } });
+    await taskRepository.save(newTask);
   } catch (error) {
     abort(500, 'Can not add new task');
   }
@@ -27,7 +28,8 @@ export async function getTaskList({ skip, take, userId }: GetTaskListParams): Pr
   const queryBuilder = getRepository(Tasks)
     .createQueryBuilder('task')
     .where('task.userId = :id', { id: userId })
-    .select(['task.id id', 'task.title title', 'task.content content', 'task.status status']);
+    .select(['task.id id', 'task.title title', 'task.content content', 'task.status status'])
+    .orderBy('id', 'DESC');
 
   const total = await queryBuilder.getCount();
 
