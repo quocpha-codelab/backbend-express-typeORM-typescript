@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableForeignKey } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex, TableUnique } from 'typeorm';
 
 import { TaskStatus } from '../../enums/Task';
 
@@ -18,10 +18,6 @@ export class createTasksTable1623228525670 implements MigrationInterface {
             generationStrategy: 'increment',
           },
           {
-            name: 'title',
-            type: 'varchar(63)',
-          },
-          {
             name: 'content',
             type: 'varchar(255)',
           },
@@ -29,6 +25,14 @@ export class createTasksTable1623228525670 implements MigrationInterface {
             name: 'status',
             type: 'tinyint',
             default: TaskStatus.OPEN,
+          },
+          {
+            name: 'rank',
+            type: 'int',
+          },
+          {
+            name: 'date',
+            type: 'date',
           },
           {
             name: 'userId',
@@ -55,6 +59,20 @@ export class createTasksTable1623228525670 implements MigrationInterface {
         columnNames: ['userId'],
         referencedColumnNames: ['id'],
         referencedTableName: 'users',
+      }),
+    );
+
+    await queryRunner.createIndex(
+      'tasks',
+      new TableIndex({
+        columnNames: ['date', 'userId'],
+      }),
+    );
+
+    await queryRunner.createUniqueConstraint(
+      'tasks',
+      new TableUnique({
+        columnNames: ['date', 'userId', 'rank'],
       }),
     );
   }

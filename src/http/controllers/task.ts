@@ -1,4 +1,5 @@
-import { getTasksSchema, updateTaskSchema } from './../../validators/task';
+import { formatDate } from './../../helper/date';
+import * as taskSchema from './../../validators/task';
 import { validate } from './../../helper/validate';
 import { Request, Response } from 'express';
 
@@ -12,10 +13,11 @@ export default class UserController {
   async addTask(req: Request, res: Response): Promise<void> {
     const params = {
       userId: req['user'].id,
-      title: req.body.title,
       content: req.body.content,
+      date: req.body.date,
     };
 
+    await validate(taskSchema.addTaskSchema, params);
     await taskService.addTask(params);
 
     res.status(201).send();
@@ -25,44 +27,79 @@ export default class UserController {
   async getTasks(req: Request, res: Response): Promise<void> {
     const params = {
       userId: req['user'].id,
-      skip: req.query.skip,
-      take: req.query.take,
+      date: req.query.date,
     };
 
-    validate(getTasksSchema, params);
+    await validate(taskSchema.getTasksSchema, params);
 
     const formatParams = {
       userId: req['user'].id,
-      skip: +req.query.skip,
-      take: +req.query.take,
+      date: formatDate(String(req.query.date)),
     };
-
     const responseData = await taskService.getTaskList(formatParams);
 
     res.status(200).send(responseData);
   }
 
-  @Put('/:taskId')
-  async updateTask(req: Request, res: Response): Promise<void> {
+  @Put('/:taskId/content')
+  async updateTaskContent(req: Request, res: Response): Promise<void> {
     const params = {
       userId: req['user'].id,
       taskId: req.params.taskId,
-      status: req.query.status,
-      title: req.query.title,
-      content: req.query.content,
+      content: req.body.content,
     };
 
-    validate(updateTaskSchema, params);
+    await validate(taskSchema.updateTaskContentSchema, params);
 
     const formatParams = {
       userId: req['user'].id,
       taskId: +req.params.taskId,
-      status: +req.query.status,
-      title: String(req.query.title),
-      content: String(req.query.content),
+      content: req.body.content,
     };
 
-    await taskService.updateTask(formatParams);
+    await taskService.updateTaskContent(formatParams);
+
+    res.sendStatus(204);
+  }
+
+  @Put('/:taskId/rank')
+  async updateTaskRank(req: Request, res: Response): Promise<void> {
+    const params = {
+      userId: req['user'].id,
+      taskId: req.params.taskId,
+      rank: req.body.rank,
+    };
+
+    await validate(taskSchema.updateTaskRankSchema, params);
+
+    const formatParams = {
+      userId: req['user'].id,
+      taskId: +req.params.taskId,
+      rank: req.body.rank,
+    };
+
+    await taskService.updateTaskRank(formatParams);
+
+    res.sendStatus(204);
+  }
+
+  @Put('/:taskId/date')
+  async updateTaskDate(req: Request, res: Response): Promise<void> {
+    const params = {
+      userId: req['user'].id,
+      taskId: req.params.taskId,
+      date: req.body.date,
+    };
+
+    await validate(taskSchema.updateTaskDateSchema, params);
+
+    const formatParams = {
+      userId: req['user'].id,
+      taskId: +req.params.taskId,
+      date: req.body.date,
+    };
+
+    await taskService.updateTaskDate(formatParams);
 
     res.sendStatus(204);
   }

@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 
 import * as authService from '../services/auth';
-import { APP, Post } from '../../helper/decorator';
-import { validate } from './../../helper/validate';
-import { signUpSchema, signInSchema } from './../../validators/auth';
+import { APP, Get, Post } from '../../helper/decorator';
+import { validate } from '../../helper/validate';
+import { signUpSchema, signInSchema } from '../../validators/auth';
+import auth from '../middlewares/auth';
 
 @APP('/auth')
 export default class UserController {
@@ -30,5 +31,11 @@ export default class UserController {
     await validate(signUpSchema, params);
     const responseData = await authService.signUp(params);
     res.status(200).send(responseData);
+  }
+
+  @Get('/me', [auth])
+  async getMe(req: Request, res: Response): Promise<void> {
+    const user = req['user'];
+    res.status(200).json(user);
   }
 }

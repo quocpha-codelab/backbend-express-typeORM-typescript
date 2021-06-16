@@ -1,18 +1,25 @@
-import { getRepository } from 'typeorm';
+import { getRepository, getManager } from 'typeorm';
 
 import { abort } from '../../helper/error';
 import Tasks from '../entities/Tasks';
 
 interface AddTaskParams {
-  title: string;
   content: string;
   userId: number;
+  date: string;
 }
-export async function addTask({ title, content, userId }: AddTaskParams): Promise<void> {
+export async function addTask({ content, userId, date }: AddTaskParams): Promise<void> {
   const taskRepository = getRepository(Tasks);
 
   try {
-    const newTask = taskRepository.create({ title, content, user: { id: userId } });
+    const maxTaskRank = await taskRepository
+      .createQueryBuilder('tasks')
+      .where('tasks.date = :date', { date })
+      .orderBy('tasks.rank', 'DESC')
+      .getRawOne();
+    const newRank = maxTaskRank ? maxTaskRank.tasks_rank + 1 : 0;
+
+    const newTask = taskRepository.create({ content, user: { id: userId }, rank: newRank, date });
     await taskRepository.save(newTask);
   } catch (error) {
     abort(500, 'Can not add new task');
@@ -20,45 +27,105 @@ export async function addTask({ title, content, userId }: AddTaskParams): Promis
 }
 
 interface GetTaskListParams {
-  skip: number;
-  take: number;
+  date: string;
   userId: number;
 }
-export async function getTaskList({ skip, take, userId }: GetTaskListParams): Promise<Record<string, unknown>> {
+export async function getTaskList({ date, userId }: GetTaskListParams): Promise<Record<string, unknown>> {
   const queryBuilder = getRepository(Tasks)
-    .createQueryBuilder('task')
-    .where('task.userId = :id', { id: userId })
-    .select(['task.id id', 'task.title title', 'task.content content', 'task.status status'])
-    .orderBy('id', 'DESC');
-
-  const total = await queryBuilder.getCount();
-
-  queryBuilder.skip(skip).take(take);
+    .createQueryBuilder('tasks')
+    .where('tasks.date = :date', { date })
+    .andWhere('tasks.userId = :userId', { userId })
+    .select([
+      'tasks.id id',
+      'tasks.content content',
+      'tasks.status status',
+      'tasks.rank',
+      "DATE_FORMAT(tasks.date,'%y-%m-%d') date",
+    ])
+    .orderBy('tasks.rank', 'DESC');
 
   const tasks = await queryBuilder.getRawMany();
 
-  return {
-    tasks,
-    total,
-    skip,
-    take,
-  };
+  return { tasks };
 }
 
-interface UpdateTaskParams {
-  title: string;
+interface UpdateTaskContentParams {
   content: string;
   userId: number;
   taskId: number;
-  status: number;
 }
-export async function updateTask({ title, content, userId, taskId, status }: UpdateTaskParams): Promise<any> {
-  // const taskRepository = getRepository(Tasks);
-  // const taskInfo = taskRepository.findOne(taskId);
-  // return taskInfo;
-  // try {
-  //   await taskRepository.update(taskId, { status });
-  // } catch (error) {
-  //   abort(500, 'Can not update task');
-  // }
+export async function updateTaskContent({ content, userId, taskId }: UpdateTaskContentParams): Promise<any> {
+  const taskRepository = getRepository(Tasks);
+  const taskInfo = await taskRepository.findOne({ where: { id: taskId }, relations: ['user'] });
+
+  if (taskInfo.user?.id !== userId) {
+    abort(400, 'You cant not update this task');
+  }
+
+  try {
+    await taskRepository.update(taskId, { content });
+  } catch (error) {
+    abort(500, 'Can not update task');
+  }
+}
+
+interface UpdateTaskDateParams {
+  date: string;
+  userId: number;
+  taskId: number;
+}
+export async function updateTaskDate({ date, userId, taskId }: UpdateTaskDateParams): Promise<any> {
+  const taskRepository = getRepository(Tasks);
+  const taskInfo = await taskRepository.findOne(taskId);
+
+  if (taskInfo.user?.id !== userId) {
+    abort(400, 'You cant not update this task');
+  }
+
+  try {
+    const maxTaskRank = await taskRepository
+      .createQueryBuilder('tasks')
+      .where('tasks.date = :date', { date })
+      .orderBy('tasks.rank', 'DESC')
+      .getRawOne();
+    const newRank = maxTaskRank ? maxTaskRank.tasks_rank + 1 : 0;
+
+    await taskRepository.update(taskId, { rank: newRank, date });
+  } catch (error) {
+    abort(500, 'Can not update task');
+  }
+}
+
+interface UpdateTaskRankParams {
+  rank: number;
+  userId: number;
+  taskId: number;
+}
+export async function updateTaskRank({ rank, userId, taskId }: UpdateTaskRankParams): Promise<any> {
+  const taskRepository = getRepository(Tasks);
+  const taskInfo = await taskRepository.findOne({ where: { id: taskId }, relations: ['user'] });
+
+  if (taskInfo.user?.id !== userId) {
+    abort(400, 'You cant not update this task');
+  }
+
+  const taskDate = taskInfo.date;
+  const tasksQueryBuilder = taskRepository.createQueryBuilder('tasks');
+
+  try {
+    await getManager().transaction(async () => {
+      await tasksQueryBuilder
+        .where('tasks.date = :date', { date: taskDate })
+        .andWhere('tasks.rank >= :taskRank', { taskRank: rank })
+        .update()
+        .set({ rank: () => 'tasks.rank + 1' })
+        .execute();
+
+      taskInfo.rank = rank;
+
+      await taskRepository.save(taskInfo);
+    });
+  } catch (error) {
+    abort(500, 'Can not update task');
+  }
 }
