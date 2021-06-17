@@ -112,7 +112,7 @@ export default class UserController {
       status: req.body.status,
     };
 
-    await validate(taskSchema.updateTaskPositionSchema, params);
+    await validate(taskSchema.updateTaskStatusSchema, params);
 
     const formatParams = {
       userId: req['user'].id,
@@ -132,7 +132,7 @@ export default class UserController {
       taskId: req.params.taskId,
     };
 
-    await validate(taskSchema.removeTaskPositionSchema, params);
+    await validate(taskSchema.removeTaskSchema, params);
 
     const formatParams = {
       userId: req['user'].id,

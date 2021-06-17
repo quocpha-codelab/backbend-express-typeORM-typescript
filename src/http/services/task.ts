@@ -40,7 +40,7 @@ export async function getTaskList({ date, userId }: GetTaskListParams): Promise<
       'tasks.content content',
       'tasks.status status',
       'tasks.position position',
-      "DATE_FORMAT(tasks.date,'%y-%m-%d') date",
+      'tasks.date date',
     ])
     .orderBy('tasks.position', 'DESC');
 
@@ -76,9 +76,9 @@ interface UpdateTaskDateParams {
 }
 export async function updateTaskDate({ date, userId, taskId }: UpdateTaskDateParams): Promise<any> {
   const taskRepository = getRepository(Tasks);
-  const taskInfo = await taskRepository.findOne(taskId);
+  const taskInfo = await taskRepository.findOne({ where: { id: taskId }, relations: ['user'] });
 
-  if (taskInfo.user?.id !== userId) {
+  if (taskInfo.user.id !== userId) {
     abort(400, 'You cant not update this task');
   }
 
@@ -102,19 +102,19 @@ interface UpdateTaskPositionParams {
   taskId: number;
 }
 export async function updateTaskPosition({ position, userId, taskId }: UpdateTaskPositionParams): Promise<any> {
-  const taskRepository = getRepository(Tasks);
-  const taskInfo = await taskRepository.findOne({ where: { id: taskId }, relations: ['user'] });
-
-  if (taskInfo.user?.id !== userId) {
-    abort(400, 'You cant not update this task');
-  }
-
-  const taskDate = taskInfo.date;
-  const tasksQueryBuilder = taskRepository.createQueryBuilder('tasks');
-
   try {
-    await getManager().transaction(async () => {
-      await tasksQueryBuilder
+    await getManager().transaction(async (transaction) => {
+      const taskRepository = transaction.getRepository(Tasks);
+      const taskInfo = await taskRepository.findOne({ where: { id: taskId }, relations: ['user'] });
+
+      if (taskInfo.user?.id !== userId) {
+        abort(400, 'You cant not update this task');
+      }
+
+      const taskDate = taskInfo.date;
+
+      await taskRepository
+        .createQueryBuilder('tasks')
         .where('tasks.date = :date', { date: taskDate })
         .andWhere('tasks.position >= :taskPosition', { taskPosition: position })
         .orderBy('tasks.position', 'DESC')

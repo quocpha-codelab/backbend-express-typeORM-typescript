@@ -34,10 +34,10 @@ export const updateTaskPositionSchema = Joi.object().keys({
 export const updateTaskStatusSchema = Joi.object().keys({
   userId: Joi.number().integer().min(1).required(),
   taskId: Joi.number().integer().min(1).required(),
-  position: Joi.valid(TaskStatus.OPEN, TaskStatus.DONE),
+  status: Joi.valid(TaskStatus.OPEN, TaskStatus.DONE),
 });
 
-export const removeTaskPositionSchema = Joi.object().keys({
+export const removeTaskSchema = Joi.object().keys({
   userId: Joi.number().integer().min(1).required(),
   taskId: Joi.number().integer().min(1).required(),
 });
