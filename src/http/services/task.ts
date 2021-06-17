@@ -12,14 +12,14 @@ export async function addTask({ content, userId, date }: AddTaskParams): Promise
   const taskRepository = getRepository(Tasks);
 
   try {
-    const maxTaskRank = await taskRepository
+    const maxTaskPosition = await taskRepository
       .createQueryBuilder('tasks')
       .where('tasks.date = :date', { date })
-      .orderBy('tasks.rank', 'DESC')
+      .orderBy('tasks.position', 'DESC')
       .getRawOne();
-    const newRank = maxTaskRank ? maxTaskRank.tasks_rank + 1 : 0;
+    const newPosition = maxTaskPosition ? maxTaskPosition.tasks_position + 1 : 0;
 
-    const newTask = taskRepository.create({ content, user: { id: userId }, rank: newRank, date });
+    const newTask = taskRepository.create({ content, user: { id: userId }, position: newPosition, date });
     await taskRepository.save(newTask);
   } catch (error) {
     abort(500, 'Can not add new task');
@@ -39,10 +39,10 @@ export async function getTaskList({ date, userId }: GetTaskListParams): Promise<
       'tasks.id id',
       'tasks.content content',
       'tasks.status status',
-      'tasks.rank',
+      'tasks.position position',
       "DATE_FORMAT(tasks.date,'%y-%m-%d') date",
     ])
-    .orderBy('tasks.rank', 'DESC');
+    .orderBy('tasks.position', 'DESC');
 
   const tasks = await queryBuilder.getRawMany();
 
@@ -83,25 +83,25 @@ export async function updateTaskDate({ date, userId, taskId }: UpdateTaskDatePar
   }
 
   try {
-    const maxTaskRank = await taskRepository
+    const maxTaskPosition = await taskRepository
       .createQueryBuilder('tasks')
       .where('tasks.date = :date', { date })
-      .orderBy('tasks.rank', 'DESC')
+      .orderBy('tasks.position', 'DESC')
       .getRawOne();
-    const newRank = maxTaskRank ? maxTaskRank.tasks_rank + 1 : 0;
+    const newPosition = maxTaskPosition ? maxTaskPosition.tasks_position + 1 : 0;
 
-    await taskRepository.update(taskId, { rank: newRank, date });
+    await taskRepository.update(taskId, { position: newPosition, date });
   } catch (error) {
     abort(500, 'Can not update task');
   }
 }
 
-interface UpdateTaskRankParams {
-  rank: number;
+interface UpdateTaskPositionParams {
+  position: number;
   userId: number;
   taskId: number;
 }
-export async function updateTaskRank({ rank, userId, taskId }: UpdateTaskRankParams): Promise<any> {
+export async function updateTaskPosition({ position, userId, taskId }: UpdateTaskPositionParams): Promise<any> {
   const taskRepository = getRepository(Tasks);
   const taskInfo = await taskRepository.findOne({ where: { id: taskId }, relations: ['user'] });
 
@@ -116,12 +116,12 @@ export async function updateTaskRank({ rank, userId, taskId }: UpdateTaskRankPar
     await getManager().transaction(async () => {
       await tasksQueryBuilder
         .where('tasks.date = :date', { date: taskDate })
-        .andWhere('tasks.rank >= :taskRank', { taskRank: rank })
+        .andWhere('tasks.position >= :taskPosition', { taskPosition: position })
         .update()
-        .set({ rank: () => 'tasks.rank + 1' })
+        .set({ position: () => 'tasks.position + 1' })
         .execute();
 
-      taskInfo.rank = rank;
+      taskInfo.position = position;
 
       await taskRepository.save(taskInfo);
     });

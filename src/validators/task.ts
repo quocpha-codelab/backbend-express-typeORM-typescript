@@ -25,8 +25,8 @@ export const updateTaskDateSchema = Joi.object().keys({
   date: Joi.date().required(),
 });
 
-export const updateTaskRankSchema = Joi.object().keys({
+export const updateTaskPositionSchema = Joi.object().keys({
   userId: Joi.number().integer().min(1).required(),
   taskId: Joi.number().integer().min(1).required(),
-  rank: Joi.number().integer().required(),
+  position: Joi.number().integer().required(),
 });

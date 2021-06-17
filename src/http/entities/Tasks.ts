@@ -17,7 +17,7 @@ export default class Tasks {
   date: string;
 
   @Column()
-  rank: number | null;
+  position: number | null;
 
   @ManyToOne(() => Users)
   user: Users;

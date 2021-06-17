@@ -62,23 +62,23 @@ export default class UserController {
     res.sendStatus(204);
   }
 
-  @Put('/:taskId/rank')
-  async updateTaskRank(req: Request, res: Response): Promise<void> {
+  @Put('/:taskId/position')
+  async updateTaskPosition(req: Request, res: Response): Promise<void> {
     const params = {
       userId: req['user'].id,
       taskId: req.params.taskId,
-      rank: req.body.rank,
+      position: req.body.position,
     };
 
-    await validate(taskSchema.updateTaskRankSchema, params);
+    await validate(taskSchema.updateTaskPositionSchema, params);
 
     const formatParams = {
       userId: req['user'].id,
       taskId: +req.params.taskId,
-      rank: req.body.rank,
+      position: req.body.position,
     };
 
-    await taskService.updateTaskRank(formatParams);
+    await taskService.updateTaskPosition(formatParams);
 
     res.sendStatus(204);
   }

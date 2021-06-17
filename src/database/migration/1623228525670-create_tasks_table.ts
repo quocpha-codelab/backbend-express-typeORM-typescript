@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex, TableUnique } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from 'typeorm';
 
 import { TaskStatus } from '../../enums/Task';
 
@@ -27,7 +27,7 @@ export class createTasksTable1623228525670 implements MigrationInterface {
             default: TaskStatus.OPEN,
           },
           {
-            name: 'rank',
+            name: 'position',
             type: 'int',
           },
           {
@@ -69,12 +69,7 @@ export class createTasksTable1623228525670 implements MigrationInterface {
       }),
     );
 
-    await queryRunner.createUniqueConstraint(
-      'tasks',
-      new TableUnique({
-        columnNames: ['date', 'userId', 'rank'],
-      }),
-    );
+    await queryRunner.query(`ALTER TABLE tasks ADD CONSTRAINT uniqueTaskPosition UNIQUE (date, position, userId)`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
