@@ -4,7 +4,7 @@ import { validate } from './../../helper/validate';
 import { Request, Response } from 'express';
 
 import * as taskService from '../services/task';
-import { APP, Post, Get, Put } from '../../helper/decorator';
+import { APP, Post, Get, Put, Delete } from '../../helper/decorator';
 import auth from '../middlewares/auth';
 
 @APP('/tasks', [auth])
@@ -100,6 +100,46 @@ export default class UserController {
     };
 
     await taskService.updateTaskDate(formatParams);
+
+    res.sendStatus(204);
+  }
+
+  @Put('/:taskId/status')
+  async updateTaskStatus(req: Request, res: Response): Promise<void> {
+    const params = {
+      userId: req['user'].id,
+      taskId: req.params.taskId,
+      status: req.body.status,
+    };
+
+    await validate(taskSchema.updateTaskPositionSchema, params);
+
+    const formatParams = {
+      userId: req['user'].id,
+      taskId: +req.params.taskId,
+      status: +req.body.status,
+    };
+
+    await taskService.updateTaskStatus(formatParams);
+
+    res.sendStatus(204);
+  }
+
+  @Delete('/:taskId')
+  async RemoveTask(req: Request, res: Response): Promise<void> {
+    const params = {
+      userId: req['user'].id,
+      taskId: req.params.taskId,
+    };
+
+    await validate(taskSchema.removeTaskPositionSchema, params);
+
+    const formatParams = {
+      userId: req['user'].id,
+      taskId: +req.params.taskId,
+    };
+
+    await taskService.removeTask(formatParams);
 
     res.sendStatus(204);
   }

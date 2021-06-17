@@ -1,6 +1,6 @@
 import * as Joi from 'joi';
 
-// import { TaskStatus } from './../enums/Task';x
+import { TaskStatus } from './../enums/Task';
 
 export const getTasksSchema = Joi.object().keys({
   userId: Joi.number().integer().min(1).required(),
@@ -29,4 +29,15 @@ export const updateTaskPositionSchema = Joi.object().keys({
   userId: Joi.number().integer().min(1).required(),
   taskId: Joi.number().integer().min(1).required(),
   position: Joi.number().integer().required(),
+});
+
+export const updateTaskStatusSchema = Joi.object().keys({
+  userId: Joi.number().integer().min(1).required(),
+  taskId: Joi.number().integer().min(1).required(),
+  position: Joi.valid(TaskStatus.OPEN, TaskStatus.DONE),
+});
+
+export const removeTaskPositionSchema = Joi.object().keys({
+  userId: Joi.number().integer().min(1).required(),
+  taskId: Joi.number().integer().min(1).required(),
 });

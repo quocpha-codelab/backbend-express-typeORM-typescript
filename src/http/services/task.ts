@@ -117,6 +117,7 @@ export async function updateTaskPosition({ position, userId, taskId }: UpdateTas
       await tasksQueryBuilder
         .where('tasks.date = :date', { date: taskDate })
         .andWhere('tasks.position >= :taskPosition', { taskPosition: position })
+        .orderBy('tasks.position', 'DESC')
         .update()
         .set({ position: () => 'tasks.position + 1' })
         .execute();
@@ -125,6 +126,45 @@ export async function updateTaskPosition({ position, userId, taskId }: UpdateTas
 
       await taskRepository.save(taskInfo);
     });
+  } catch (error) {
+    abort(500, 'Can not update task');
+  }
+}
+
+interface UpdateTaskStatusParams {
+  status: number;
+  userId: number;
+  taskId: number;
+}
+export async function updateTaskStatus({ status, userId, taskId }: UpdateTaskStatusParams): Promise<any> {
+  const taskRepository = getRepository(Tasks);
+  const taskInfo = await taskRepository.findOne({ where: { id: taskId }, relations: ['user'] });
+
+  if (taskInfo.user?.id !== userId) {
+    abort(400, 'You cant not update this task');
+  }
+
+  try {
+    await taskRepository.update(taskId, { status });
+  } catch (error) {
+    abort(500, 'Can not update task');
+  }
+}
+
+interface DeleteTaskParams {
+  userId: number;
+  taskId: number;
+}
+export async function removeTask({ userId, taskId }: DeleteTaskParams): Promise<any> {
+  const taskRepository = getRepository(Tasks);
+  const taskInfo = await taskRepository.findOne({ where: { id: taskId }, relations: ['user'] });
+
+  if (taskInfo.user?.id !== userId) {
+    abort(400, 'You cant not remove this task');
+  }
+
+  try {
+    await taskRepository.remove(taskInfo);
   } catch (error) {
     abort(500, 'Can not update task');
   }
