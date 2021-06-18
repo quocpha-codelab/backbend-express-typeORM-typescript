@@ -14,7 +14,10 @@ async function getUser(req: Request) {
   const token = authorization.slice(7, authorization.length);
   const payload = jwt.parse(token);
   if (payload === false) return false;
-  const user = await userRepository.findOne(payload.userId);
+  const user = await userRepository.findOne({
+    where: { id: payload.userId },
+    select: ['id', 'username', 'fullName', 'status'],
+  });
   if (!user) return false;
   return user;
 }
